@@ -1,0 +1,62 @@
+ ______________________________________________________________________________
+|                                                                              |
+|  ███  LCARS TERMINAL INTERFACE                           SECTOR: /var/log    |
+|                                                                              |
+|  ┌───────────────────────────────────────────────────────────────────────┐   |
+|  │  NODO: Lxin-Server NCC-0704                                           │   |
+|  │  ROL : Servidor de Entrenamiento ASIR                                 │   |
+|  │  MODO: Simulación de puente de mando                                  │   |
+|  │  Cadate: Li Xinyuan                                                   │   |
+|  │  ID Grupo: 12138                                                      │   |
+|  │  Saludo LCARS: "Todos los sistemas operativos."                       │   |
+|  │  Fecha Estelar: $(date)                                               │   |
+|  └───────────────────────────────────────────────────────────────────────┘   |
+|                                                                              |
+|  █████   MODOS RÁPIDOS                                                       |
+|  █  01   Estado del núcleo warp      ->  sudo systemctl status               |
+|  █  02   Sensores de red             ->  ip a / ss -tulnp                    |
+|  █  03   Registros de la Flota       ->  journalctl / tail -f /var/log/*     |
+|  █  04   Cámaras de ingeniería       ->  top / htop                          |
+|                                                                              |
+|  █████   PROTOCOLO DE ACCESO                                                 |
+|  █  A1   Identidad de oficial:      lxin0704                                 |
+|  █  A2   Código de autenticación:   «larga vida y prosperidad»               |
+|                                                                              |
+|  ┌───────────────────────────────────────────────────────────────────────┐   |
+|  │   COMPUTADORA DE A BORDO:                                             │   |
+|  │                                                                       │   |
+|  │   » Credenciales vulcanas aceptadas.                                  │   |
+|  │   » Lógica confirmada.                                                │   |
+|  │   » Núcleo warp estable.                                              │   |
+|  │                                                                       │   |
+|  │   Próxima acción sugerida:                                            │   |
+|  │      - Revisar anomalías en el sector /var/log                        │   |
+|  │      - Comprobar integridad de escudos (firewall / ssh)               │   |
+|  └───────────────────────────────────────────────────────────────────────┘   |
+|                                                                              |
+|  █████   RECORDATORIOS DE FLOTA                                              |
+|  █  B1   No ejecutes comandos como root sin pensar dos veces.                |
+|  █  B2   Los logs lo ven TODO.                                               |
+|  █  B3   Backups diarios, drama cero.                                        |
+|                                                                              |
+|__________________________ FIN DEL CANAL DE ESTATUS __________________________|
+                          .-=========-.
+                          \'-======-'/ 
+                          _|   __   |_
+       ________________.-' |  |__|  | '-.________________
+      /  ____   ____   \   |  ____  |   /   ____   ____  \
+     /  /_  /  / __ \   \  | |    | |  /   / __ \  \_  \  \
+    /____/ /__/ /  \_\___\_|_|____|_|_/___/_/  \_\__\_\____\
+        /_/  /_/                      \_\  \_\
+                       USS COMPETENCIAL
+                 "Larga vida y prosperidad"
+NOTAS DEL INGENIERO:
+sudo find / -iname "archivo.txt"
+sudo grep -R "texto" / 2>/dev/null
+
+
+---------------------------------------------------
+IMPORTANTE
+MENSAJE FLOTA ESTELAR: Tu primera misión es la 47-A
+ 
+

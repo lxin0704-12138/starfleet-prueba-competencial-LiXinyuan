@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+   <html lang="es">
+   <head>
+       <meta charset="UTF-8">
+       <title>Panel de Diagnóstico de Ingeniería</title>
+       <style>
+           body { background-color: black; color: #00FFFF; font-family: Arial, sans-serif; }
+           .lcars-panel { border: 3px solid #FF9999; padding: 15px; margin: 10px auto; max-width: 800px; }
+           .lcars-title { color: #FF9999; border-bottom: 2px solid #FF9999; padding-bottom: 5px; }
+           .telemetry-item { margin: 10px 0; padding: 5px; border: 1px solid #00FFFF; }
+           .telemetry-label { color: #FF9999; font-weight: bold; }
+       </style>
+   </head>
+   <body>
+       <div class="lcars-panel">
+           <h1 class="lcars-title">Panel de Diagnóstico de Ingeniería - USS Enterprise NCC-1701-D</h1>
+           <div id="telemetry-data" class="telemetry-item">
+               Cargando datos de telemetría...
+           </div>
+       </div>
+
+       <script>
+           fetch('telem_generator.php')
+               .then(response => response.json())
+               .then(data => {
+                   const telemetryDiv = document.getElementById('telemetry-data');
+                   telemetryDiv.innerHTML = `
+                       <div><span class="telemetry-label">Estado Apache:</span> ${data.apache_status}</div>
+                       <div><span class="telemetry-label">Estado MySQL:</span> ${data.mysql_status}</div>
+                       <div><span class="telemetry-label">Versión PHP:</span> ${data.php_version}</div>
+                       <div><span class="telemetry-label">Versión Docker:</span> ${data.docker_version}</div>
+                       <div><span class="telemetry-label">Versión Kernel:</span> ${data.kernel_version}</div>
+                       <div><span class="telemetry-label">Tiempo Activo:</span> ${data.uptime}</div>
+                   `;
+               })
+               .catch(error => {
+                   document.getElementById('telemetry-data').innerHTML = `
+                       <div class="error">Error al cargar telemetría: ${error.message}</div>
+                   `;
+               });
+       </script>
+   </body>
+   </html>
