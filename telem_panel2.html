@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURALINK - ENTERPRISE DIAGNOSTIC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            background: #000;
+            background-image: 
+                linear-gradient(rgba(18, 16, 16, 0.9) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 16, 16, 0.9) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #05D9E8;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .lcars-panel {
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 1px solid #FF2A6D;
+            border-radius: 8px;
+            padding: 2rem;
+            background: 
+                linear-gradient(135deg, rgba(17, 0, 32, 0.9), rgba(0, 20, 40, 0.8));
+            box-shadow: 
+                0 0 30px rgba(255, 42, 109, 0.5),
+                0 0 60px rgba(5, 217, 232, 0.3),
+                inset 0 0 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            animation: borderGlitch 8s infinite;
+        }
+
+        .lcars-panel::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            background: linear-gradient(45deg, #FF2A6D, #05D9E8, #D1FAFF, #FF2A6D);
+            background-size: 400%;
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+            border-radius: 10px;
+            filter: blur(8px);
+            opacity: 0.7;
+        }
+
+        .lcars-panel .corner-light {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            filter: blur(15px);
+            z-index: 0;
+        }
+        .lcars-panel .corner-light.tl { top: 20px; left: 20px; background: #FF2A6D; }
+        .lcars-panel .corner-light.br { bottom: 20px; right: 20px; background: #05D9E8; }
+
+        .lcars-title {
+            font-family: 'Orbitron', sans-serif;
+            color: #D1FAFF;
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            margin-bottom: 2rem;
+            position: relative;
+            text-shadow: 
+                0 0 10px #05D9E8,
+                0 0 20px #05D9E8,
+                0 0 40px #05D9E8;
+            animation: textGlitch 2s infinite;
+        }
+        .lcars-title::after {
+            content: "NCC-1701-D / NEURAL NETWORK ONLINE";
+            display: block;
+            font-size: 1rem;
+            color: #FF2A6D;
+            margin-top: 10px;
+            opacity: 0.8;
+            letter-spacing: 2px;
+            text-shadow: none;
+            animation: pulse 3s infinite;
+        }
+
+        #telemetry-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .telemetry-item {
+            padding: 1.2rem;
+            border: 1px solid rgba(209, 250, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(0, 10, 20, 0.6);
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .telemetry-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 1px solid transparent;
+            background: linear-gradient(45deg, #FF2A6D, transparent, #05D9E8) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .telemetry-item:hover {
+            transform: translateY(-8px) rotateX(5deg);
+            box-shadow: 
+                0 15px 30px rgba(255, 42, 109, 0.2),
+                0 0 20px rgba(5, 217, 232, 0.4);
+            border-color: #05D9E8;
+        }
+        .telemetry-item:hover::before {
+            opacity: 1;
+        }
+        .telemetry-item::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(209, 250, 255, 0.1), 
+                transparent);
+            animation: dataFlow 3s infinite;
+        }
+
+        .telemetry-label {
+            font-family: 'Orbitron', sans-serif;
+            color: #FF2A6D;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 1px;
+        }
+        .telemetry-item span:last-child {
+            font-size: 1.2rem;
+            color: #D1FAFF;
+            text-shadow: 0 0 5px rgba(209, 250, 255, 0.5);
+        }
+
+        .loading {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 2rem;
+            color: #05D9E8;
+            position: relative;
+        }
+        .loading::after {
+            content: "01101000 01110101 01100011 01101011 01101001 01101110 01100111...";
+            display: block;
+            font-size: 0.9rem;
+            color: #FF2A6D;
+            margin-top: 1rem;
+            opacity: 0.7;
+            animation: dataStream 8s linear infinite;
+        }
+
+        .error {
+            padding: 1.5rem;
+            border: 1px solid #FF2A6D;
+            border-radius: 4px;
+            background: rgba(100, 0, 30, 0.5);
+            color: #FF2A6D;
+            font-size: 1.1rem;
+            position: relative;
+            animation: errorGlitch 0.5s infinite;
+        }
+        .error::before {
+            content: "SYSTEM ERROR";
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #D1FAFF;
+        }
+
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes borderGlitch {
+            0%, 100% { border-color: #FF2A6D; }
+            25% { border-color: #05D9E8; }
+            50% { border-color: #D1FAFF; }
+            75% { border-color: #FF2A6D; }
+        }
+        @keyframes textGlitch {
+            0%, 100% { transform: translate(0); }
+            5% { transform: translate(-2px, 2px); }
+            10% { transform: translate(2px, -2px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        @keyframes dataFlow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        @keyframes dataStream {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes errorGlitch {
+            0%, 100% { transform: translate(0); }
+            25% { transform: translate(-1px, 0); }
+            50% { transform: translate(1px, 0); }
+            75% { transform: translate(-1px, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .lcars-title { font-size: 1.8rem; }
+            #telemetry-data { grid-template-columns: 1fr; }
+            .telemetry-item { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lcars-panel">
+        <div class="corner-light tl"></div>
+        <div class="corner-light br"></div>
+        
+        <h1 class="lcars-title">PANEL DE DIAGNÓSTICO - USS ENTERPRISE</h1>
+        
+        <div id="telemetry-data" class="loading">
+            CARGANDO DATOS DE TELEMETRÍA...
+        </div>
+    </div>
+
+    <script>
+        fetch('telem_generator.php')
+            .then(response => {
+                if (!response.ok) throw new Error('Error de conexión con el núcleo');
+                return response.json();
+            })
+            .then(data => {
+                const telemetryDiv = document.getElementById('telemetry-data');
+                telemetryDiv.classList.remove('loading');
+                telemetryDiv.innerHTML = `
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">ESTADO APACHE:</span>
+                        ${data.apache_status.trim() || 'DESCONOCIDO'}
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">ESTADO MYSQL:</span>
+                        ${data.mysql_status.trim() || 'DESCONOCIDO'}
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">VERSIÓN PHP:</span>
+                        ${data.php_version || 'DESCONOCIDO'}
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">VERSIÓN DOCKER:</span>
+                        ${data.docker_version || 'DOCKER NO INSTALADO'}
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">VERSIÓN KERNEL:</span>
+                        ${data.kernel_version || 'DESCONOCIDO'}
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">TIEMPO ACTIVO:</span>
+                        ${data.uptime || 'DESCONOCIDO'}
+                    </div>
+                `;
+            })
+            .catch(error => {
+                const telemetryDiv = document.getElementById('telemetry-data');
+                telemetryDiv.classList.remove('loading');
+                telemetryDiv.innerHTML = `
+                    <div class="error">${error.message} - CONEXIÓN PERDIDA CON EL NÚCLEO</div>
+                `;
+            });
+    </script>
+</body>
+</html>
