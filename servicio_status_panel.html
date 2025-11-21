@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            background: #000;
+            background-image:
+                linear-gradient(rgba(18, 16, 16, 0.9) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 16, 16, 0.9) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #05D9E8;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .lcars-panel {
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 1px solid #FF2A6D;
+            border-radius: 8px;
+            padding: 2rem;
+            background:
+                linear-gradient(135deg, rgba(17, 0, 32, 0.9), rgba(0, 20, 40, 0.8));
+            box-shadow:
+                0 0 30px rgba(255, 42, 109, 0.5),
+                0 0 60px rgba(5, 217, 232, 0.3),
+                inset 0 0 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            animation: borderGlitch 8s infinite;
+        }
+
+        .lcars-panel::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            background: linear-gradient(45deg, #FF2A6D, #05D9E8, #D1FAFF, #FF2A6D);
+            background-size: 400%;
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+            border-radius: 10px;
+            filter: blur(8px);
+            opacity: 0.7;
+        }
+
+        .lcars-panel .corner-light {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            filter: blur(15px);
+            z-index: 0;
+        }
+        .lcars-panel .corner-light.tl { top: 20px; left: 20px; background: #FF2A6D; }
+        .lcars-panel .corner-light.br { bottom: 20px; right: 20px; background: #05D9E8; }
+
+        .lcars-title {
+            font-family: 'Orbitron', sans-serif;
+            color: #D1FAFF;
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            margin-bottom: 2rem;
+            position: relative;
+            text-shadow:
+                0 0 10px #05D9E8,
+                0 0 20px #05D9E8,
+                0 0 40px #05D9E8;
+            animation: textGlitch 2s infinite;
+        }
+        .lcars-title::after {
+            content: "NCC-1701-D / COMPLETO SISTEMA DIAGNÓSTICO";
+            display: block;
+            font-size: 1rem;
+            color: #FF2A6D;
+            margin-top: 10px;
+            opacity: 0.8;
+            letter-spacing: 2px;
+            text-shadow: none;
+            animation: pulse 3s infinite;
+        }
+
+        /* 布局优化：服务卡片 + 系统遥测卡片 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .full-width-card {
+            grid-column: 1 / -1;
+            padding: 1.2rem;
+            border: 1px solid rgba(209, 250, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(0, 10, 20, 0.6);
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card {
+            padding: 1.2rem;
+            border: 1px solid rgba(209, 250, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(0, 10, 20, 0.6);
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .service-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 1px solid transparent;
+            background: linear-gradient(45deg, #FF2A6D, transparent, #05D9E8) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-8px) rotateX(5deg);
+            box-shadow:
+                0 15px 30px rgba(255, 42, 109, 0.2),
+                0 0 20px rgba(5, 217, 232, 0.4);
+            border-color: #05D9E8;
+        }
+        .service-card:hover::before {
+            opacity: 1;
+        }
+        .service-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(209, 250, 255, 0.1),
+                transparent);
+            animation: dataFlow 3s infinite;
+        }
+
+        .telemetry-label {
+            font-family: 'Orbitron', sans-serif;
+            color: #FF2A6D;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 1px;
+        }
+        .status-active { color: #00FF9D; font-weight: bold; }
+        .status-inactive { color: #FF4757; font-weight: bold; }
+        .status-enabled { color: #00FF9D; }
+        .status-disabled { color: #FF4757; }
+        .full-status {
+            font-size: 0.9rem;
+            color: #D1FAFF;
+            opacity: 0.7;
+            margin-top: 8px;
+            font-family: monospace;
+        }
+        .docker-list {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #D1FAFF;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+        .docker-list::-webkit-scrollbar {
+            width: 6px;
+            background: rgba(0, 20, 40, 0.5);
+        }
+        .docker-list::-webkit-scrollbar-thumb {
+            background: #05D9E8;
+            border-radius: 3px;
+        }
+
+        .loading {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 2rem;
+            color: #05D9E8;
+            position: relative;
+        }
+        .loading::after {
+            content: "01101000 01110101 01100011 01101011 01101001 01101110 01100111...";
+            display: block;
+            font-size: 0.9rem;
+            color: #FF2A6D;
+            margin-top: 1rem;
+            opacity: 0.7;
+            animation: dataStream 8s linear infinite;
+        }
+
+        .error {
+            padding: 1.5rem;
+            border: 1px solid #FF2A6D;
+            border-radius: 4px;
+            background: rgba(100, 0, 30, 0.5);
+            color: #FF2A6D;
+            font-size: 1.1rem;
+            position: relative;
+            animation: errorGlitch 0.5s infinite;
+        }
+        .error::before {
+            content: "SYSTEM ERROR";
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #D1FAFF;
+        }
+
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes borderGlitch {
+            0%, 100% { border-color: #FF2A6D; }
+            25% { border-color: #05D9E8; }
+            50% { border-color: #D1FAFF; }
+            75% { border-color: #FF2A6D; }
+        }
+        @keyframes textGlitch {
+            0%, 100% { transform: translate(0); }
+            5% { transform: translate(-2px, 2px); }
+            10% { transform: translate(2px, -2px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        @keyframes dataFlow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        @keyframes dataStream {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes errorGlitch {
+            0%, 100% { transform: translate(0); }
+            25% { transform: translate(-1px, 0); }
+            50% { transform: translate(1px, 0); }
+            75% { transform: translate(-1px, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .lcars-title { font-size: 1.8rem; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .service-card, .full-width-card { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lcars-panel">
+        <div class="corner-light tl"></div>
+        <div class="corner-light br"></div>
+
+        <h1 class="lcars-title">PANEL DE STATUS DE LOS SERVICIOS</h1>
+
+        <div id="diagnostic-dashboard" class="loading">
+            CARGANDO DATOS DE DIAGNÓSTICO COMPLETO...
+        </div>
+    </div>
+
+    <script>
+        fetch('servicio_status.php')
+            .then(response => {
+                if (!response.ok) throw new Error('Error de conexión con el servidor');
+                return response.json();
+            })
+            .then(data => {
+                const dashboardDiv = document.getElementById('diagnostic-dashboard');
+                dashboardDiv.classList.remove('loading');
+                
+                dashboardDiv.innerHTML = `
+                    <div class="dashboard-grid">
+                        <!--Apache2卡片-->
+                        <div class="service-card">
+                            <span class="telemetry-label">APACHE2</span>
+                            <div>Estado: <span class="${data.apache.active === 'active' ? 'status-active' : 'status-inactive'}">${data.apache.active.toUpperCase()}</span></div>
+                            <div>Arranque automático: <span class="${data.apache.enabled === 'enabled' ? 'status-enabled' : 'status-disabled'}">${data.apache.enabled.toUpperCase()}</span></div>
+                            <div class="full-status">${data.apache.full_status}</div>
+                        </div>
+
+                        <!-- MySQL卡片 -->
+                        <div class="service-card">
+                            <span class="telemetry-label">MYSQL</span>
+                            <div>Estado: <span class="${data.mysql.active === 'active' ? 'status-active' : 'status-inactive'}">${data.mysql.active.toUpperCase()}</span></div>
+                            <div>Arranque automático: <span class="${data.mysql.enabled === 'enabled' ? 'status-enabled' : 'status-disabled'}">${data.mysql.enabled.toUpperCase()}</span></div>
+                            <div class="full-status">${data.mysql.full_status}</div>
+                        </div>
+
+                        <!-- UFW卡片 -->
+                        <div class="service-card">
+                            <span class="telemetry-label">UFW FIREWALL</span>
+                            <div>Estado: <span class="${data.ufw.active === 'active' ? 'status-active' : 'status-inactive'}">${data.ufw.active.toUpperCase()}</span></div>
+                            <div>Arranque automático: <span class="${data.ufw.enabled === 'enabled' ? 'status-enabled' : 'status-disabled'}">${data.ufw.enabled.toUpperCase()}</span></div>
+                            <div class="full-status">${data.ufw.full_status}</div>
+                        </div>
+
+                        <!-- 系统信息卡片 -->
+                        <div class="service-card">
+                            <span class="telemetry-label">SISTEMA BASE</span>
+                            <div>Kernel: ${data.system.kernel_version}</div>
+                            <div>Tiempo activo: ${data.system.uptime}</div>
+                            <div>PHP Versión: ${data.system.php_version}</div>
+                            <div>Docker Versión: ${data.system.docker_version}</div>
+                        </div>
+
+                        <!-- 内存使用卡片 -->
+                        <div class="service-card">
+                            <span class="telemetry-label">MEMORIA USO</span>
+                            <div class="full-status">${data.system.memory_usage || 'No disponible'}</div>
+                        </div>
+                    </div>
+
+                    <!-- Docker容器列表（全宽卡片） -->
+                    <div class="full-width-card">
+                        <span class="telemetry-label">DOCKER CONTENEDORES</span>
+                        <div class="docker-list">${data.system.docker_containers || 'No hay contenedores / Docker no instalado'}</div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                const dashboardDiv = document.getElementById('diagnostic-dashboard');
+                dashboardDiv.classList.remove('loading');
+                dashboardDiv.innerHTML = `
+                    <div class="error">${error.message} - FALLO EN DIAGNÓSTICO</div>
+                `;
+                console.error('Error detalle:', error);
+            });
+    </script>
+</body>
+</html>

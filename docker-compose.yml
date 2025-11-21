@@ -1,0 +1,31 @@
+version: '3'
+services:
+  db:
+    image: mariadb:latest
+    container_name: wp_mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Lxy20050704.
+      MYSQL_DATABASE: PrC_db
+      MYSQL_USER: ub
+      MYSQL_PASSWORD: Lxy20050704.
+    volumes:
+      - db_data:/var/lib/mysql
+  wordpress:
+    container_name: wp_site
+    depends_on:
+      - db
+    image: wordpress:latest
+    restart: always
+    ports:
+      - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ub
+      WORDPRESS_DB_PASSWORD: Lxy20050704.
+      WORDPRESS_DB_NAME: PrC_db
+    volumes:
+      - wordpress_data:/var/www/html
+volumes:
+  db_data:
+  wordpress_data:
