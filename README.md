@@ -6,6 +6,7 @@
 - ID Grupo:12138
 - Saludo LCARS:"Todos los sistemas operativos."
 - Fecha: 2025/11/21
+- Procedimientos operativos del administrador del sistema de la Flota Estelar：
   1. Modificar la información de la interfaz de inicio de sesión
   2. Instalar, habilitar y comprobar el estado operativo: Apache, MySQL, ufw y PHP
   3. Docker
